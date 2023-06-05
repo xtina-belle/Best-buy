@@ -1,3 +1,8 @@
+from typing import Optional
+
+from promotions import *
+
+
 class Product:
     """class represents a product in store
     Attributes: name, price, quantity, active(if in stock)"""
@@ -14,6 +19,7 @@ class Product:
                 self._active = False
         except ValueError as error:
             print(error)
+        self.promotion: Optional[Promotion] = None
 
     def get_quantity(self) -> int:
         """:returns: quantity of product in stock"""
@@ -37,6 +43,8 @@ class Product:
             self._quantity -= quantity
             if not self._quantity:
                 self._active = False
+            if self.promotion:
+                return self.promotion.apply_promotion(self, quantity)
             return self.price * quantity
         except ValueError as error:
             print(error)
@@ -44,7 +52,8 @@ class Product:
 
     def show(self) -> str:
         """:returns: a string that represents the product"""
-        return f"{self.name}, Price: {self.price}, Quantity: {self._quantity}"
+        return f"{self.name}, Price: {self.price}, Quantity: {self._quantity}" + \
+            f" {', Promotion: '+ self.promotion.name if self.promotion else chr(32)}"
 
     def is_active(self) -> bool:
         """:returns: True if the product is active, otherwise False."""
@@ -62,6 +71,12 @@ class Product:
         except ValueError as error:
             print(error)
 
+    def set_promotion(self, promotion: Promotion):
+        self.promotion = promotion
+
+    def get_promotion(self):
+        return self.promotion
+
 
 class NonStockedProduct(Product):
     def __init__(self, name, price):
@@ -70,11 +85,14 @@ class NonStockedProduct(Product):
 
     def show(self) -> str:
         """:returns: a string that represents the product"""
-        return f"{self.name}, Price: ${self.price}, Quantity: Unlimited"
+        return f"{self.name}, Price: ${self.price}, Quantity: Unlimited" + \
+            f" {', Promotion: '+ self.promotion.name if self.promotion else chr(32)}"
 
     def buy(self, quantity: int) -> float:
         """Buys a given quantity of the product,
                 :returns the total price of the purchase"""
+        if self.promotion:
+            return self.promotion.apply_promotion(self, quantity)
         return self.price * quantity
 
 
@@ -85,7 +103,8 @@ class LimitedProduct(Product):
 
     def show(self) -> str:
         """:returns: a string that represents the product"""
-        return f"{self.name}, Price: ${self.price}, Limited to {self.maximum} per order!"
+        return f"{self.name}, Price: ${self.price}, Limited to {self.maximum} per order!" + \
+            f" {', Promotion: '+ self.promotion.name if self.promotion else chr(32)}"
 
     def buy(self, quantity: int) -> float:
         """Buys a given or maximal quantity of the product,
@@ -97,6 +116,8 @@ class LimitedProduct(Product):
             self._quantity -= quantity
             if not self._quantity:
                 self.deactivate()
+            if self.promotion:
+                return self.promotion.apply_promotion(self, quantity)
             return self.price * quantity
         except ValueError as error:
             print(error)
