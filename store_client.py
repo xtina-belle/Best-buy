@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from storedb import StoreDB
+from products import *
 
 
 class StoreClient:
@@ -24,7 +25,8 @@ class StoreClient:
             if res == "2":
                 self.show_total_amount()
             if res == "3":
-                print("\nWhen you want to finish order, enter empty text.")
+                print("\nTo remove a quantity of product in order enter -(number)")
+                print("When you want to finish order, enter empty text.\n")
                 self.make_order()
             if res == "4":
                 break
@@ -51,12 +53,18 @@ class StoreClient:
                     current_amount = products[int(product_num) - 1].get_quantity()
                     product = products[int(product_num) - 1]
                     amount = int(amount)
-                    if current_amount < amount or \
-                            current_amount < shopping_prod_to_quant.get(product, 0) + amount:
+                    amount_in_order = shopping_prod_to_quant.get(product, 0)
+                    if not isinstance(product, NonStockedProduct) and \
+                            current_amount < amount_in_order + amount:
                         raise ValueError(
-                            "There's only "
-                            f"{current_amount - shopping_prod_to_quant.get(product, 0)}"
-                            " items left. You can't buy more.\n")
+                            f"There's only {current_amount - amount_in_order} items left. "
+                            "You can't buy more.\n")
+                    if isinstance(product, LimitedProduct) and \
+                            amount_in_order + amount > product.maximum:
+                        raise ValueError(f"Limited to {product.maximum} per order!")
+                    if amount < 0 and -amount > amount_in_order:
+                        raise ValueError("You can't remove from order more than you've chosen")
+
                     shopping_prod_to_quant[product] += amount
                     print("Product added to list!\n")
                     continue
