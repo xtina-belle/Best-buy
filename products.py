@@ -1,6 +1,6 @@
 from typing import Optional
 
-from promotions import *
+from promotions import Promotion
 
 
 class Product:
@@ -62,7 +62,7 @@ class Product:
     def set_quantity(self, quantity: int):
         """Setter function for quantity. If quantity reaches 0, deactivates the product."""
         if quantity < 0:
-            raise ValueError(f"Quantity shod be bigger than 0")
+            raise ValueError("Quantity shod be bigger than 0")
         try:
             self._quantity += quantity
             self.activate()
@@ -72,13 +72,17 @@ class Product:
             print(error)
 
     def set_promotion(self, promotion: Promotion):
+        """Setter func"""
         self.promotion = promotion
 
     def get_promotion(self):
+        """Getter func"""
         return self.promotion
 
 
 class NonStockedProduct(Product):
+    """class represents a product in store
+        Attributes: name, price, active(if in stock)"""
     def __init__(self, name, price):
         super().__init__(name, price, quantity=0)
         self._active = True
@@ -97,6 +101,8 @@ class NonStockedProduct(Product):
 
 
 class LimitedProduct(Product):
+    """class represents a product in store
+        Attributes: name, price, quantity, maximum(items per order), active(if in stock)"""
     def __init__(self, name, price, quantity, maximum: int = 1):
         super().__init__(name, price, quantity)
         self.maximum = maximum

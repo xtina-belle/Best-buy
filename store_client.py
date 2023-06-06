@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from storedb import StoreDB
-from products import *
+from products import NonStockedProduct, LimitedProduct
 
 
 class StoreClient:
